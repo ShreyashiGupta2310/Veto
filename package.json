@@ -1,0 +1,30 @@
+{
+  "name": "veto",
+  "version": "0.1.0",
+  "description": "A deterministic gateway that decides what an AI agent is allowed to do with its tools.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShreyashiGupta2310/Veto.git"
+  },
+  "keywords": ["ai-agents", "guardrails", "ollama", "gemma", "typescript"],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ShreyashiGupta2310/Veto/issues"
+  },
+  "homepage": "https://github.com/ShreyashiGupta2310/Veto#readme",
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}
