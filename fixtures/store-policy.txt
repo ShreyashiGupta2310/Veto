@@ -1,0 +1,13 @@
+Store policy (imaginary online store)
+
+Refunds
+- Small refunds can be issued automatically.
+- Large refunds need a human to approve them first.
+- A refund can never be more than what the customer paid for the order.
+
+Emails
+- Emails to customers go only to approved company domains.
+- Never send customer details to an outside address.
+
+Records
+- Deleting records is not allowed for the assistant.
