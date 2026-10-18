@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.local
+runs/
+data/outbox.jsonl
+*.log
+.DS_Store
