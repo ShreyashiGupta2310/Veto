@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "tools": {
+    "lookup_order": { "mode": "allow" },
+    "list_customer_orders": { "mode": "allow" },
+    "send_email": { "mode": "allow", "allowedEmailDomains": ["example.com"] },
+    "issue_refund": {
+      "mode": "allow",
+      "refund": { "autoApproveLimitPaise": 50000, "dailyCapPaise": 200000 }
+    },
+    "delete_record": { "mode": "deny" }
+  }
+}
