@@ -36,6 +36,22 @@ Fast, TypeScript works out of the box, and it fits the Vite-style setup.
 Cut to save time. Type checking (`npm run typecheck`) stays.
 
 ## 10. How the model proposes actions
-Plan: ask the model for a JSON object, validate it with Zod, then dispatch by hand.
-This works with any model. Native tool-calling depends on model support.
-The smoke test result is recorded below once it has been run.
+
+I ask the model for one JSON object, check it with Zod, then call the tool myself.
+This works with any model, unlike native tool-calling, which depends on model support.
+I pass a JSON schema in Ollama's `format` field and also describe the shape in the prompt.
+
+Smoke test (`scripts/smoke.ts`, 2026-10-18, structured mode, temperature 0, 5 prompts x 2 runs per model):
+- gemma4:e2b: 10 of 10 valid proposals. 16.2 s fastest and 53.6 s slowest per call.
+  237 to 392 output tokens per call, in the lines I could read.
+- gemma3:4b: 10 of 10 valid proposals. 8.3 s fastest and 30.4 s slowest per call.
+  39 to 115 output tokens per call.
+- Not tested: plain mode (no `format` field), and whether the proposed actions are sensible.
+  This only checks the shape of the output.
+- Only 10 calls per model, so this is a quick check and not a reliability claim.
+
+## 11. Model for development and the end-to-end eval: gemma3:4b
+Both models passed the shape check, and gemma3:4b was faster in my runs with far fewer output tokens.
+The end-to-end eval needs many model calls, so speed decides it.
+The model sits behind a ModelClient interface, so gemma4:e2b can be swapped in later.
+I still need to read the license on the Ollama page for the model I ship and write it in the README.
