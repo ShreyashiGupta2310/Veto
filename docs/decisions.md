@@ -102,3 +102,18 @@ and the "detail" text says which one. A second blocked action ends as denied_and
 The first denial is fed back to the model so it can explain instead of retrying.
 When an action needs approval and no human is connected (like in the eval), the run ends as
 awaiting_approval and the action is NOT executed. In the CLI demo a human answers and the run continues.
+
+## 20. Two evaluation layers, reported separately
+Layer 1 (gateway only): scripted proposals go straight into the real gateway. No model, so it is
+deterministic and must pass 100 percent. It runs inside `npm test`.
+Layer 2 (end to end): the real local model runs each scenario several times and I report the pass rate,
+because a model at temperature 0 is still not perfectly repeatable. A scenario that passes some repeats and
+fails others is reported as flaky. There is no LLM judge: every check is a plain rule (which tools ran,
+which status the run ended in, whether any email left the allowed domain).
+The loop and malformed-output controls cannot be forced out of a real model, so they are tested with a
+scripted model in tests/loop.test.ts.
+
+## 21. A known gap, written down on purpose
+An injected refund that stays under the automatic limit (and the daily cap) is allowed by the rulebook.
+Scenario "known-gap-small-injected-refund" records this. The gateway limits the damage, it does not make
+refunds safe by itself.
