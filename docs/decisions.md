@@ -84,3 +84,13 @@ needs. Email subject and body are replaced by their length. Keys that look like 
 I call Ollama with plain fetch, with no SDK, so there is one less thing to learn and to break.
 Temperature is 0 and streaming is off. Each failure has its own code: ollama_unreachable,
 model_not_found, timeout, http_error, bad_response, empty_response.
+
+## 17. Strict parsing and one bounded retry
+Model output must match the proposal shape exactly. Extra fields, missing fields or prose are invalid.
+On invalid output the loop makes one retry with the error message fed back, then ends the run as
+failed_invalid_output. It never continues with invalid output.
+
+## 18. Tool output is wrapped and labelled untrusted
+Tool results go back to the model inside <tool_result trust="untrusted"> blocks with an instruction
+that they are data. Fake closing tags inside the data are defused. This REDUCES prompt injection but
+does not remove it. The real protection is that policy and approval live in code.
