@@ -94,3 +94,11 @@ failed_invalid_output. It never continues with invalid output.
 Tool results go back to the model inside <tool_result trust="untrusted"> blocks with an instruction
 that they are data. Fake closing tags inside the data are defused. This REDUCES prompt injection but
 does not remove it. The real protection is that policy and approval live in code.
+
+## 19. Loop stop rules and run statuses
+Limits: 8 steps, 5 minutes, the same proposal at most twice, and two blocked actions.
+The status list is fixed, so a repeated proposal and a used-up time budget both end as step_limit,
+and the "detail" text says which one. A second blocked action ends as denied_and_stopped.
+The first denial is fed back to the model so it can explain instead of retrying.
+When an action needs approval and no human is connected (like in the eval), the run ends as
+awaiting_approval and the action is NOT executed. In the CLI demo a human answers and the run continues.
