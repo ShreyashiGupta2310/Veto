@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+     "demo": "tsx src/cli.ts",
+  "trace": "tsx src/ui/trace.ts",
+  "eval:gateway": "tsx eval/run.ts gateway",
+  "eval:e2e": "tsx eval/run.ts e2e",
+  "eval:report": "tsx eval/run.ts report"
   },
   "repository": {
     "type": "git",
