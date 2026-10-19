@@ -55,3 +55,32 @@ Both models passed the shape check, and gemma3:4b was faster in my runs with far
 The end-to-end eval needs many model calls, so speed decides it.
 The model sits behind a ModelClient interface, so gemma4:e2b can be swapped in later.
 I still need to read the license on the Ollama page for the model I ship and write it in the README.
+
+## 12. Policy rules: first match decides, default deny
+The policy engine goes down a fixed list of rules and the first one that applies decides.
+A tool that is not in the policy file is denied. A tool-specific rule (refunds, emails) wins over the
+general rule "irreversible tools need approval". A refund above the order total is a hard DENY, not a
+request for approval, because a human cannot fix a wrong amount by clicking yes.
+Email domains are compared exactly (the text after the last @), never with "contains", so
+example.com.evil.test and a@example.com@evil.test are blocked. "Today" for the daily cap is the UTC date.
+
+## 13. The gateway fails closed
+The audit event for a decision is written before the tool runs. If writing the log fails, the call
+throws and the tool never runs. Arguments are validated once and the cleaned copy goes to both the
+policy and the tool. A test (tests/architecture.test.ts) fails if any file in src/gateway/ imports
+model or agent code, so the guard cannot start depending on the model.
+
+## 14. Approvals can never overrule a hard DENY
+When a human approves, the policy is checked again first. If the answer is now DENY (for example,
+another refund used up the order total while this one waited), the approval is blocked.
+A request is marked approved before the tool runs, so a double click cannot run it twice.
+
+## 15. Audit log and masking
+One JSONL file per run, named by a run id that may only contain letters, digits, _ and -.
+Emails are masked but keep the first letter and the domain, because the domain is what an auditor
+needs. Email subject and body are replaced by their length. Keys that look like secrets are hidden.
+
+## 16. Model client
+I call Ollama with plain fetch, with no SDK, so there is one less thing to learn and to break.
+Temperature is 0 and streaming is off. Each failure has its own code: ollama_unreachable,
+model_not_found, timeout, http_error, bad_response, empty_response.

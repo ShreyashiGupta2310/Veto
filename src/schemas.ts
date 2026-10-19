@@ -50,6 +50,7 @@ export type RunStatus = z.infer<typeof RunStatus>;
 export const AuditEventType = z.enum([
   "run_started",
   "model_response",
+  "model_error",
   "proposal_invalid",
   "gateway_decision",
   "approval_requested",
@@ -73,6 +74,10 @@ export const AuditEvent = z.strictObject({
   modelId: z.string().min(1),
   promptVersion: z.string().min(1),
   policyVersion: z.string().min(1),
+  status: RunStatus.optional(),
+  detail: z.string().optional(),
+  promptTokens: z.number().int().nonnegative().optional(),
+  outputTokens: z.number().int().nonnegative().optional(),
   error: z.string().optional(),
 });
 export type AuditEvent = z.infer<typeof AuditEvent>;
