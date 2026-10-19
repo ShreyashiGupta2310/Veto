@@ -112,6 +112,66 @@ export class Gateway {
     return this.execute(tool, cleanArgs, redactedArgs, decision, step);
   }
 
+    // Called by the approval queue when an action goes into the waiting room.
+  recordApprovalRequested(pending: PendingAction, decision: GatewayDecision, step: number): void {
+    this.log("approval_requested", step, {
+      toolName: pending.toolName,
+      redactedArgs: this.deps.redact(pending.args),
+      decision: decision.decision,
+      ruleId: decision.ruleId,
+    });
+  }
+
+  // Called when a human says no.
+  recordRejected(pending: PendingAction, step: number): void {
+    this.log("approval_resolved", step, {
+      toolName: pending.toolName,
+      redactedArgs: this.deps.redact(pending.args),
+      decision: "DENY",
+      ruleId: "human-rejected",
+    });
+  }
+
+  // Called when a human says yes. The rulebook is checked again first:
+  // a human can approve "ask a human", but never overrule a hard DENY.
+  async executeApproved(pending: PendingAction, step: number): Promise<GatewayOutcome> {
+    const started = Date.now();
+    const elapsed = () => Date.now() - started;
+
+    const tool = this.toolsByName.get(pending.toolName);
+    if (!tool) {
+      const decision = deny("unknown-tool", `There is no tool called "${pending.toolName.slice(0, 100)}".`);
+      return this.finishDenied(decision, step, elapsed(), pending.toolName.slice(0, 100), undefined);
+    }
+
+    const parsedArgs = tool.argsSchema.safeParse(pending.args);
+    if (!parsedArgs.success) {
+      const decision = deny("invalid-args", `Invalid arguments for ${tool.name}.`);
+      return this.finishDenied(decision, step, elapsed(), tool.name, this.safeRedact(pending.args));
+    }
+    const cleanArgs = parsedArgs.data as Record<string, unknown>;
+    const redactedArgs = this.deps.redact(cleanArgs);
+
+    const recheck = evaluatePolicy({ tool, args: cleanArgs }, this.deps.policy, this.deps.ctx);
+    if (recheck.decision === "DENY") {
+      return this.finishDenied(recheck, step, elapsed(), tool.name, redactedArgs);
+    }
+
+    const decision: GatewayDecision = {
+      decision: "ALLOW",
+      ruleId: "human-approved",
+      reason: `A human approved ${tool.name}. The policy rule at that moment was ${recheck.ruleId}.`,
+    };
+    this.log("approval_resolved", step, {
+      toolName: tool.name,
+      redactedArgs,
+      decision: "ALLOW",
+      ruleId: decision.ruleId,
+      latencyMs: elapsed(),
+    });
+    return this.execute(tool, cleanArgs, redactedArgs, decision, step);
+  }
+
   private finishDenied(
     decision: GatewayDecision,
     step: number,
@@ -174,3 +234,4 @@ export class Gateway {
     this.deps.audit(event);
   }
 }
+
